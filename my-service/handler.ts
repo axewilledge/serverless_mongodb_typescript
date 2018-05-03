@@ -47,9 +47,11 @@ const getOffers : Handler = async (event: any, context: Context, callback: Callb
 
 
 
-const filterOffers : Handler = async (event: any, context: Context, callback: Callback) => {
+const postOffers : Handler = async (event: any, context: Context, callback: Callback) => {
   
   // let db = DbClient.connect();
+
+  //NOTE: YOU HAVE TO CREATE $text INDEX ON EVERY FIELD TO USE THE FIND METHOD ON ALL THE FIELDS
   try {
 
     MongoClient.connect("mongodb://localhost:27017/", (err, db) => {
@@ -59,20 +61,19 @@ const filterOffers : Handler = async (event: any, context: Context, callback: Ca
     } else {
         console.log("Connected: Done");
         this.db= db.db("moneyworkz");
-        let results;
-        this.db.collection("offers")
-              .find({ $text : { $search : event.pathParameters.phrase}})
-                  .toArray( function(err, result){
+        const data = JSON.parse(event.body)
+        this.db.collection("offers").insert(data,function(err, result){
 
-                    console.log(result);                   
+          console.log(result);                   
 
-                    const response: HelloResponse = {
-                      statusCode: 200,
-                      body: JSON.stringify(result)
-                    };
-                    callback(undefined, response);
-                    
-                  });
+          const response: HelloResponse = {
+            statusCode: 200,
+            body: JSON.stringify(result)
+          };
+          callback(undefined, response);
+          
+        });
+                  
         
       } 
       });
@@ -85,6 +86,42 @@ const filterOffers : Handler = async (event: any, context: Context, callback: Ca
 };
 
 
+const filterOffers : Handler = async (event: any, context: Context, callback: Callback) => {
+  
+  // let db = await DbClient.connect();
+  try {
+
+    MongoClient.connect("mongodb://localhost:27017/", (err, db) => {
+
+    if(err) {
+        console.log(err);
+    } else {
+        console.log("Connected: Done");
+        this.db= db.db("moneyworkz");
+        let results;
+        this.db.collection("offers")
+                      .find({ $text : { $search : event.pathParameters.phrase}})
+                      .toArray( function(err, result){
+
+                        console.log(result);                   
+
+                        const response: HelloResponse = {
+                          statusCode: 200,
+                          body: JSON.stringify(result)
+                        };
+                        callback(undefined, response);
+                        
+                      });
+        
+      } 
+      });
+
+    // return this.db;
+    } catch (error) {
+        console.log("Unable to connect to db");
+    }
+
+};
 
 
-export { getOffers, filterOffers }
+export { getOffers, filterOffers, postOffers }

@@ -72,10 +72,43 @@ var getOffers = function (event, context, callback) { return __awaiter(_this, vo
     });
 }); };
 exports.getOffers = getOffers;
-var filterOffers = function (event, context, callback) { return __awaiter(_this, void 0, void 0, function () {
+var postOffers = function (event, context, callback) { return __awaiter(_this, void 0, void 0, function () {
     var _this = this;
     return __generator(this, function (_a) {
         // let db = DbClient.connect();
+        //NOTE: YOU HAVE TO CREATE $text INDEX ON EVERY FIELD TO USE THE FIND METHOD ON ALL THE FIELDS
+        try {
+            mongodb_1.MongoClient.connect("mongodb://localhost:27017/", function (err, db) {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    console.log("Connected: Done");
+                    _this.db = db.db("moneyworkz");
+                    var data = JSON.parse(event.body);
+                    _this.db.collection("offers").insert(data, function (err, result) {
+                        console.log(result);
+                        var response = {
+                            statusCode: 200,
+                            body: JSON.stringify(result)
+                        };
+                        callback(undefined, response);
+                    });
+                }
+            });
+            return [2 /*return*/, this.db];
+        }
+        catch (error) {
+            console.log("Unable to connect to db");
+        }
+        return [2 /*return*/];
+    });
+}); };
+exports.postOffers = postOffers;
+var filterOffers = function (event, context, callback) { return __awaiter(_this, void 0, void 0, function () {
+    var _this = this;
+    return __generator(this, function (_a) {
+        // let db = await DbClient.connect();
         try {
             mongodb_1.MongoClient.connect("mongodb://localhost:27017/", function (err, db) {
                 if (err) {
@@ -97,7 +130,7 @@ var filterOffers = function (event, context, callback) { return __awaiter(_this,
                     });
                 }
             });
-            return [2 /*return*/, this.db];
+            // return this.db;
         }
         catch (error) {
             console.log("Unable to connect to db");

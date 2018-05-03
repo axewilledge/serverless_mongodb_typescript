@@ -73,6 +73,15 @@ functions:
       - http:
           path: offer
           method: get
+  
+  postOffers:
+    handler: handler.postOffers
+    events:
+      - http:
+          path: offer
+          method: post
+
+          
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
 #      - sns: greeter-topic
