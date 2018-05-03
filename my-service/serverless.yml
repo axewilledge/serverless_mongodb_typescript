@@ -81,6 +81,13 @@ functions:
           path: offer
           method: post
 
+  createIndex:
+    handler: handler.createIndex
+    events:
+      - http:
+          path: createindex/run
+          method: post
+
           
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)

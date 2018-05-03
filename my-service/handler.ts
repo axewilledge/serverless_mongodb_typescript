@@ -97,10 +97,13 @@ const filterOffers : Handler = async (event: any, context: Context, callback: Ca
         console.log(err);
     } else {
         console.log("Connected: Done");
+        console.log(event.pathParameters.phrase);
+        var outString = event.pathParameters.phrase.replace(/[`%20`]/gi, ' '); 
+        console.log(outString);
         this.db= db.db("moneyworkz");
         let results;
         this.db.collection("offers")
-                      .find({ $text : { $search : event.pathParameters.phrase}})
+                      .find({ $text : { $search : outString}})
                       .toArray( function(err, result){
 
                         console.log(result);                   
@@ -124,4 +127,40 @@ const filterOffers : Handler = async (event: any, context: Context, callback: Ca
 };
 
 
-export { getOffers, filterOffers, postOffers }
+const createIndex : Handler = async (event: any, context: Context, callback: Callback) => {
+  
+  // let db = await DbClient.connect();
+  try {
+
+    MongoClient.connect("mongodb://localhost:27017/", (err, db) => {
+
+    if(err) {
+        console.log(err);
+    } else {
+        console.log("Connected: Done");
+        this.db= db.db("moneyworkz");
+        let results;
+        this.db.collection("offers").createIndex({ Hashtags: "text", Title: "text", ShortDescription: "text", duration: "text" } ,{name:"fullText"},function(err, result){
+
+                        console.log(result);                   
+
+                        const response: HelloResponse = {
+                          statusCode: 200,
+                          body: JSON.stringify(result)
+                        };
+                        callback(undefined, response);
+                        
+                      });
+        
+      } 
+      });
+
+    // return this.db;
+    } catch (error) {
+        console.log("Unable to connect to db");
+    }
+
+};
+
+
+export { getOffers, filterOffers, postOffers, createIndex }

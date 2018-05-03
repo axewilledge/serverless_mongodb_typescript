@@ -116,10 +116,13 @@ var filterOffers = function (event, context, callback) { return __awaiter(_this,
                 }
                 else {
                     console.log("Connected: Done");
+                    console.log(event.pathParameters.phrase);
+                    var outString = event.pathParameters.phrase.replace(/[`%20`]/gi, ' ');
+                    console.log(outString);
                     _this.db = db.db("moneyworkz");
                     var results = void 0;
                     _this.db.collection("offers")
-                        .find({ $text: { $search: event.pathParameters.phrase } })
+                        .find({ $text: { $search: outString } })
                         .toArray(function (err, result) {
                         console.log(result);
                         var response = {
@@ -139,4 +142,36 @@ var filterOffers = function (event, context, callback) { return __awaiter(_this,
     });
 }); };
 exports.filterOffers = filterOffers;
+var createIndex = function (event, context, callback) { return __awaiter(_this, void 0, void 0, function () {
+    var _this = this;
+    return __generator(this, function (_a) {
+        // let db = await DbClient.connect();
+        try {
+            mongodb_1.MongoClient.connect("mongodb://localhost:27017/", function (err, db) {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    console.log("Connected: Done");
+                    _this.db = db.db("moneyworkz");
+                    var results = void 0;
+                    _this.db.collection("offers").createIndex({ Hashtags: "text", Title: "text", ShortDescription: "text", duration: "text" }, { name: "fullText" }, function (err, result) {
+                        console.log(result);
+                        var response = {
+                            statusCode: 200,
+                            body: JSON.stringify(result)
+                        };
+                        callback(undefined, response);
+                    });
+                }
+            });
+            // return this.db;
+        }
+        catch (error) {
+            console.log("Unable to connect to db");
+        }
+        return [2 /*return*/];
+    });
+}); };
+exports.createIndex = createIndex;
 //# sourceMappingURL=handler.js.map
